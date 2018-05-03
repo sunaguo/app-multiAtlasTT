@@ -19,7 +19,7 @@ module load freesurfer
 ####################################################################
 
 # fetch the data
-wget https://ndownloader.figshare.com/files/10791467
+wget -q https://ndownloader.figshare.com/files/10791467
 tar -vxf 10791467
 
 ####################################################################
