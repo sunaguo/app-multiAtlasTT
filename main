@@ -1,12 +1,12 @@
 #!/bin/bash
 
-INPUT_DIR=`jp -r '.iDir' config.json`
-#OUTPUT_DIR=`jp -r '' config.json`
-OUTPUT_DIR='/out/'
-#FS_VERSION=`jp -r '.' config.json`
+INPUT_DIR=`jq -r '.fsin' config.json`
+#OUTPUT_DIR=`jq -r '' config.json`
+OUTPUT_DIR='out'
+#FS_VERSION=`jq -r '.' config.json`
 FS_VERSION='6p0'
 
-mkdir -p ${PWD}/${OUTPUT_DIR}/
+mkdir -p ${PWD}/${OUTPUT_DIR}
 
 ####################################################################
 ####################################################################
@@ -25,12 +25,14 @@ tar -vxf 10791467
 ####################################################################
 ####################################################################
 
-export atlasBaseDir=${PWD}/
-export scriptBaseDir=${PWD}/
+export atlasBaseDir=${PWD}
+export scriptBaseDir=${PWD}
+
 # make a list from these options: 
 # nspn500 gordon333 yeo17 hcp-mmp schaefer100-yeo17 
 # schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 
 # schaefer1000-yeo17
+
 export atlasList="schaefer100-yeo17 schaefer200-yeo17 yeo17"
 
 ####################################################################
