@@ -18,13 +18,6 @@ module load freesurfer
 ####################################################################
 ####################################################################
 
-# fetch the data
-wget https://ndownloader.figshare.com/files/10791467
-tar -vxf 10791467
-
-####################################################################
-####################################################################
-
 export atlasBaseDir=${PWD}
 export scriptBaseDir=${PWD}
 
@@ -34,6 +27,34 @@ export scriptBaseDir=${PWD}
 # schaefer1000-yeo17
 
 export atlasList="schaefer100-yeo17 schaefer200-yeo17 yeo17"
+
+####################################################################
+####################################################################
+
+# fetch the data, if it does not already exist
+gcsMissing=0
+gcsFiles=''
+
+for ii in ${atlasList}
+do
+    for hemi in lh rh
+    do
+        currGCS=${atlasBaseDir}/atlas_data/${ii}/${hemi}.${ii}_${FS_VERSION}.gcs
+        if [[ ! -f ${currGCS} ]]
+        then
+	    gcsMissing=1
+	    break
+        fi
+    done
+done
+
+if [[ ${gcsMissing} -eq 1 ]]
+then
+    wget https://ndownloader.figshare.com/files/10791467
+    tar -vxf 10791467
+else
+    echo "gcs data already present"
+fi
 
 ####################################################################
 ####################################################################
@@ -47,6 +68,8 @@ export atlasList="schaefer100-yeo17 schaefer200-yeo17 yeo17"
 ####################################################################
 ####################################################################
 # go into the folder where we also want output and setup notes file!
+
+touch ${PWD}/${OUTPUT_DIR}/log.txt
 
 cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
         -d ${INPUT_DIR} \
