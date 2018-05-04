@@ -23,12 +23,17 @@ get_subcort_frm_aparcAseg()
     local subj=$3
 
     # initialize the subcort image, should make blank image
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${iAparcAseg} \
-            -thr 0 -uthr 0 -bin \
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${iAparcAseg} \
+    #        -thr 0 -uthr 0 -bin \
+    #        ${oDir}/${subj}_subcort_mask.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            --i ${iAparcAseg} \
+            --min 0 --max 0 --binval 0 \
             ${oDir}/${subj}_subcort_mask.nii.gz \
-            -odt int \
-        "
+        "    
     echo $cmd #state the command
     log $cmd >> $OUT
     eval $cmd #execute the command
@@ -57,54 +62,79 @@ get_subcort_frm_aparcAseg()
         getLabel=${fsLabels[x]}
         getIndex=${newIndex[x]}
 
-        cmd="${FSLDIR}/bin/fslmaths \
-                ${iAparcAseg} \
-		        -thr ${getLabel} -uthr ${getLabel} \
-                -binv \
-                ${oDir}/${subj}temp${getIndex}.nii.gz"		
+        #cmd="${FSLDIR}/bin/fslmaths \
+        #        ${iAparcAseg} \
+		#        -thr ${getLabel} -uthr ${getLabel} \
+        #        -binv \
+        #        ${oDir}/${subj}temp${getIndex}.nii.gz"		
+        cmd="${FREESURFER_HOME}/bin/mri_binarize \
+                --i ${iAparcAseg} \
+                --match ${getLabel} --inv \
+                ${oDir}/${subj}temp${getIndex}.nii.gz \
+            "        
         echo $cmd #state the command
         log $cmd >> $OUT
         eval $cmd #execute the command
 
         ### first lets make sure that there is nothhing in this subcort area
-        cmd="${FSLDIR}/bin/fslmaths \
+        #cmd="${FSLDIR}/bin/fslmaths \
+        #        ${oDir}/${subj}_subcort_mask.nii.gz \
+		#        -mas ${oDir}/${subj}temp${getIndex}.nii.gz \
+		#        ${oDir}/${subj}_subcort_mask.nii.gz \
+        #    "
+        cmd="${FREESUFER_HOME}/bin/mri_mask \
                 ${oDir}/${subj}_subcort_mask.nii.gz \
-		        -mas ${oDir}/${subj}temp${getIndex}.nii.gz \
-		        ${oDir}/${subj}_subcort_mask.nii.gz \
+                ${oDir}/${subj}temp${getIndex}.nii.gz \
+                ${oDir}/${subj}_subcort_mask.nii.gz \
             "
         echo $cmd #state the command
         log $cmd >> $OUT
         eval $cmd #execute the command
 
         ### reverse the label now 
-        cmd="${FSLDIR}/bin/fslmaths \
+        #cmd="${FSLDIR}/bin/fslmaths \
+        #        ${oDir}/${subj}temp${getIndex}.nii.gz \
+        #        -binv \
+		#        -mul ${getIndex} \
+		#        ${oDir}/${subj}temp${getIndex}.nii.gz"		
+        cmd="${FREESUFER_HOME}/bin/mri_binarize \
                 ${oDir}/${subj}temp${getIndex}.nii.gz \
-                -binv \
-		        -mul ${getIndex} \
-		        ${oDir}/${subj}temp${getIndex}.nii.gz"		
+                --match 1 --inv --binval ${getIndex} \
+                ${oDir}/${subj}temp${getIndex}.nii.gz \        
+            "
         echo $cmd #state the command
         log $cmd >> $OUT
         eval $cmd #execute the command
         
         ### add to subcort mask image now
-        cmd="${FSLDIR}/bin/fslmaths \
-		        ${oDir}/${subj}_subcort_mask.nii.gz \
-		        -add ${oDir}/${subj}temp${getIndex}.nii.gz \
-		        ${oDir}/${subj}_subcort_mask.nii.gz \
-                -odt int \
-            "
+        #cmd="${FSLDIR}/bin/fslmaths \
+		#        ${oDir}/${subj}_subcort_mask.nii.gz \
+		#        -add ${oDir}/${subj}temp${getIndex}.nii.gz \
+		#        ${oDir}/${subj}_subcort_mask.nii.gz \
+        #        -odt int \
+        #    "
+        cmd="${FREESURFER_HOME}/bin/mris_calc \
+                --output ${oDir}/${subj}_subcort_mask.nii.gz \
+                ${oDir}/${subj}temp${getIndex}.nii.gz \
+                --add ${oDir}/${subj}_subcort_mask.nii.gz \           
+            "        
         echo $cmd
         log $cmd >> $OUT
         eval $cmd
     done
     
     # and make inverted binary mask
-    cmd="${FSLDIR}/bin/fslmaths \
-	        ${oDir}/${subj}_subcort_mask.nii.gz \
-	        -binv \
-	        ${oDir}/${subj}_subcort_mask_binv.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+	#        ${oDir}/${subj}_subcort_mask.nii.gz \
+	#        -binv \
+	#        ${oDir}/${subj}_subcort_mask_binv.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            ${oDir}/${subj}_subcort_mask.nii.gz \
+            --min 1 --inv \
+            ${oDir}/${subj}_subcort_mask_binv.nii.gz \
+        "    
     echo $cmd
     log $cmd >> $OUT
     eval $cmd    
@@ -125,32 +155,44 @@ dilate_cortex()
     local tmpDir=$4
 
     # make temp subcort invert
-    cmd="${FSLDIR}/bin/fslmaths \
-	        ${iSubcortMask}  \
-	        -binv \
-	        ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+	#        ${iSubcortMask}  \
+	#        -binv \
+	#        ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            ${iSubcortMask} \
+            --min 1 --inv \
+            ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+        "        
     echo $cmd
     eval $cmd
 
     # mask out the subcort, keep temp copy
-    cmd="${FSLDIR}/bin/fslmaths \
-		    ${iCort} \
-		    -mas ${iSubcortMask} \
-            ${tmpDir}/subcort_tmp.nii.gz \
-            -odt int \
+    #cmd="${FSLDIR}/bin/fslmaths \
+	#	    ${iCort} \
+	#	    -mas ${iSubcortMask} \
+    #        ${tmpDir}/subcort_tmp.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+            ${iCort} ${iSubcortMask} ${tmpDir}/subcort_tmp.nii.gz \
         "
     echo $cmd
     eval $cmd
 
     #get cortical parcellation without subcort
-    cmd="${FSLDIR}/bin/fslmaths \
-		    ${iCort} \
-		    -mas ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+    #cmd="${FSLDIR}/bin/fslmaths \
+	#	    ${iCort} \
+	#	    -mas ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+    #        ${tmpDir}/cort_tmp.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+            ${iCort} ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
             ${tmpDir}/cort_tmp.nii.gz \
-            -odt int \
-        "
+        "    
     echo $cmd
     eval $cmd
 
@@ -173,26 +215,42 @@ dilate_cortex()
     fi
 
     # mask this by the cortical mask
-    cmd="${FSLDIR}/bin/fslmaths \
-		    ${tmpDir}/cort_tmp2.nii.gz \
-		    -mas ${iCortMask} \
+    #cmd="${FSLDIR}/bin/fslmaths \
+	#	    ${tmpDir}/cort_tmp2.nii.gz \
+	#	    -mas ${iCortMask} \
+    #        ${tmpDir}/cort_tmp2.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+            ${tmpDir}/cort_tmp2.nii.gz ${iCortMask} \
             ${tmpDir}/cort_tmp2.nii.gz \
-            -odt int \
-        "
+        "      
     echo $cmd
     eval $cmd
 
     #remove any area that went into subcort
     #and add back in cort
-    cmd="${FSLDIR}/bin/fslmaths \
-		    ${tmpDir}/cort_tmp2.nii.gz \
-		    -mas ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
-            -add ${tmpDir}/subcort_tmp.nii.gz \
-            ${iCort} \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+	#	    ${tmpDir}/cort_tmp2.nii.gz \
+	#	    -mas ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+    #        -add ${tmpDir}/subcort_tmp.nii.gz \
+    #        ${iCort} \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+            ${tmpDir}/cort_tmp2.nii.gz ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+            ${tmpDir}/cort_tmp2.nii.gz \
+        "      
     echo $cmd
     eval $cmd
+
+    cmd="${FREESURFER_HOME}/bin/mris_calc \
+            --output ${iCort} \
+            ${tmpDir}/cort_tmp2.nii.gz \
+            --add ${tmpDir}/subcort_tmp.nii.gz \           
+        "     
+    echo $cmd
+    eval $cmd  
 
     #remove extra stuff that was created
     ls ${tmpDir}/subcort_tmp.nii.gz && rm ${tmpDir}/subcort_tmp.nii.gz

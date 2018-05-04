@@ -325,12 +325,17 @@ fi
 if [[ ! -e ${outputDir}/${subj}_cortical_mask.nii.gz ]]
 then
 
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${subjAparcAseg} \
-            -thr 1000 -bin \
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${subjAparcAseg} \
+    #        -thr 1000 -bin \
+    #        ${outputDir}/${subj}_cortical_mask.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            --i ${subjAparcAseg} \
+            --min 1000 --binval 1 \
             ${outputDir}/${subj}_cortical_mask.nii.gz \
-            -odt int \
-        "
+        "     
     echo $cmd #state the command
     log $cmd >> $OUT
     eval $cmd #execute the command
@@ -374,13 +379,20 @@ do
     minVal=$(cat ${atlasOutputDir}/LUT_${atlas}.txt | awk '{print int($1)}' | head -n1)
     maxVal=$(cat ${atlasOutputDir}/LUT_${atlas}.txt | awk '{print int($1)}' | tail -n1)
 
+    # TODO
+    # stopped here
     # threshold atlas image to min and max label values from the LUT table
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${atlasOutputDir}/${atlas}.nii.gz \
-            -thr ${minVal} -uthr ${maxVal} \
-            ${atlasOutputDir}/${atlas}.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${atlasOutputDir}/${atlas}.nii.gz \
+    #        -thr ${minVal} -uthr ${maxVal} \
+    #        ${atlasOutputDir}/${atlas}.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+             ${atlasOutputDir}/${atlas}.nii.gz \
+             --min ${minVal} --max ${maxVal} \
+             
+        "    
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
