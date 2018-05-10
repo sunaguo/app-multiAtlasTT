@@ -55,6 +55,8 @@ get_subcort_frm_aparcAseg()
     # 53: Right-Hippocampus
     # 54: Right-Amygdala
     # 58: Right-Accumbens-area
+
+    # could use freesurfer func to speed this up lots
     local newIndex=( 1 2 3 4 5 6 7 8 9 10 11 12 13 14 )
     for (( x=0 ; x<14; x++ ))
     do
