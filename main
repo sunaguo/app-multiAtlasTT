@@ -1,6 +1,9 @@
 #!/bin/bash
 
-INPUT_DIR=`jq -r '.fsin' config.json`
+set -e
+
+INPUT_DIR=$1
+#INPUT_DIR=`jq -r '.fsin' config.json`
 #OUTPUT_DIR=`jq -r '' config.json`
 OUTPUT_DIR='out'
 #FS_VERSION=`jq -r '.' config.json`
@@ -12,7 +15,7 @@ mkdir -p ${PWD}/${OUTPUT_DIR}
 ####################################################################
 
 # setup FSL & FREESURFER
-module load fsl
+# module load fsl
 module load freesurfer
 
 ####################################################################
@@ -28,6 +31,9 @@ export scriptBaseDir=${PWD}
 
 export atlasList="nspn500 gordon333 yeo17 hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
 
+export atlasList="yeo17 "
+
+
 ####################################################################
 ####################################################################
 
@@ -39,7 +45,7 @@ for ii in ${atlasList}
 do
     for hemi in lh rh
     do
-        currGCS=${atlasBaseDir}/atlas_data/${ii}/${hemi}.${ii}_${FS_VERSION}.gcs
+        currGCS=${atlasBaseDir}/${ii}/${hemi}.${ii}_${FS_VERSION}.gcs
         if [[ ! -f ${currGCS} ]]
         then
 	    gcsMissing=1

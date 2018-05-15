@@ -387,7 +387,7 @@ do
     #        -odt int \
     #    "
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
-            ${atlasOutputDir}/${atlas}.nii.gz \
+            --i ${atlasOutputDir}/${atlas}.nii.gz \
             --min ${minVal} \
             --o ${outputDir}/tmp_mask1.nii.gz \
         "    
@@ -395,8 +395,8 @@ do
     log $cmd >> $OUT
     eval $cmd
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
-            ${atlasOutputDir}/${atlas}.nii.gz \
-            --max ${maxVal} --inv \
+            --i ${atlasOutputDir}/${atlas}.nii.gz \
+            --min $(( ${maxVal} + 1 )) --inv \
             --o ${outputDir}/tmp_mask2.nii.gz \
         "    
     echo $cmd
