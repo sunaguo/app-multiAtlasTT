@@ -32,7 +32,7 @@ get_subcort_frm_aparcAseg()
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
             --i ${iAparcAseg} \
             --min 0 --max 0 --binval 0 \
-            ${oDir}/${subj}_subcort_mask.nii.gz \
+            --o ${oDir}/${subj}_subcort_mask.nii.gz \
         "    
     echo $cmd #state the command
     log $cmd >> $OUT
@@ -72,7 +72,7 @@ get_subcort_frm_aparcAseg()
         cmd="${FREESURFER_HOME}/bin/mri_binarize \
                 --i ${iAparcAseg} \
                 --match ${getLabel} --inv \
-                ${oDir}/${subj}temp${getIndex}.nii.gz \
+                --o ${oDir}/${subj}temp${getIndex}.nii.gz \
             "        
         echo $cmd #state the command
         log $cmd >> $OUT
@@ -102,7 +102,7 @@ get_subcort_frm_aparcAseg()
         cmd="${FREESUFER_HOME}/bin/mri_binarize \
                 ${oDir}/${subj}temp${getIndex}.nii.gz \
                 --match 1 --inv --binval ${getIndex} \
-                ${oDir}/${subj}temp${getIndex}.nii.gz \        
+                --o ${oDir}/${subj}temp${getIndex}.nii.gz \        
             "
         echo $cmd #state the command
         log $cmd >> $OUT
@@ -135,7 +135,7 @@ get_subcort_frm_aparcAseg()
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
             ${oDir}/${subj}_subcort_mask.nii.gz \
             --min 1 --inv \
-            ${oDir}/${subj}_subcort_mask_binv.nii.gz \
+            --o ${oDir}/${subj}_subcort_mask_binv.nii.gz \
         "    
     echo $cmd
     log $cmd >> $OUT
@@ -166,7 +166,7 @@ dilate_cortex()
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
             ${iSubcortMask} \
             --min 1 --inv \
-            ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
+            --o ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
         "        
     echo $cmd
     eval $cmd

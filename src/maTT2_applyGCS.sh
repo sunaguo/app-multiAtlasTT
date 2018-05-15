@@ -334,7 +334,7 @@ then
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
             --i ${subjAparcAseg} \
             --min 1000 --binval 1 \
-            ${outputDir}/${subj}_cortical_mask.nii.gz \
+            --o ${outputDir}/${subj}_cortical_mask.nii.gz \
         "     
     echo $cmd #state the command
     log $cmd >> $OUT
