@@ -379,8 +379,6 @@ do
     minVal=$(cat ${atlasOutputDir}/LUT_${atlas}.txt | awk '{print int($1)}' | head -n1)
     maxVal=$(cat ${atlasOutputDir}/LUT_${atlas}.txt | awk '{print int($1)}' | tail -n1)
 
-    # TODO
-    # stopped here
     # threshold atlas image to min and max label values from the LUT table
     #cmd="${FSLDIR}/bin/fslmaths \
     #        ${atlasOutputDir}/${atlas}.nii.gz \
@@ -389,34 +387,47 @@ do
     #        -odt int \
     #    "
     cmd="${FREESURFER_HOME}/bin/mri_binarize \
-             ${atlasOutputDir}/${atlas}.nii.gz \
-             --min ${minVal} --max ${maxVal} \
-             
+            ${atlasOutputDir}/${atlas}.nii.gz \
+            --min ${minVal} \
+            --o ${outputDir}/tmp_mask1.nii.gz \
+        "    
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            ${atlasOutputDir}/${atlas}.nii.gz \
+            --max ${maxVal} --inv \
+            --o ${outputDir}/tmp_mask2.nii.gz \
+        "    
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+            ${outputDir}/tmp_mask1.nii.gz \
+            ${outputDir}/tmp_mask2.nii.gz \
+            ${outputDir}/tmp_mask3.nii.gz \
         "    
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
-<<'DONTNEED'
-    # move atlas from freesurfer conformed ---> native space
-    cmd="${FREESURFER_HOME}/bin/mri_vol2vol \
-            --mov ${atlasOutputDir}/${atlas}.nii.gz \
-            --targ ${inputFSDir}/mri/rawavg.mgz \
-            --regheader \
-            --o ${atlasOutputDir}/${atlas}.nii.gz \
-            --no-save-reg --nearest \
-        "
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+            ${atlasOutputDir}/${atlas}.nii.gz \
+            ${outputDir}/tmp_mask3.nii.gz \
+            ${atlasOutputDir}/${atlas}.nii.gz \
+        "    
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
-DONTNEED
+
+    # TODO could remove files here... uncomment when checked
+    #ls ${outputDir}/tmp_mask?.nii.gz && rm ${outputDir}/tmp_mask?.nii.gz
 
     # look at only cortical
-    cmd="${FSLDIR}/bin/fslmaths \
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
             ${atlasOutputDir}/${atlas}.nii.gz \
-            -mas ${outputDir}/${subj}_cortical_mask.nii.gz \
+            ${outputDir}/${subj}_cortical_mask.nii.gz \
             ${atlasOutputDir}/${atlas}.nii.gz \
-            -odt int \
         "
     echo $cmd
     log $cmd >> $OUT
@@ -446,37 +457,65 @@ DONTNEED
     ########################################
 
     # remove any stuff in area of subcortical (shouldnt be there anyways...)
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -mas ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        -mas ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mri_mask \
+        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+        ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
+        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
     # get the max value from cortical atlas image
-    maxCortical=$(fslstats ${atlasOutputDir}/${atlas}_rmap.nii.gz -R | awk '{print int($2)}')
+    # maxCortical=$(fslstats ${atlasOutputDir}/${atlas}_rmap.nii.gz -R | awk '{print int($2)}')
+    ${FREESURFER_HOME}/bin/mris_calc -o ${outputDir}/max_tmp.txt ${atlasOutputDir}/${atlas}_rmap.nii.gz max
+    maxCortical=$( cat ${outputDir}/max_tmp.txt | awk '{print int($1)}')
+    ls ${outputDir}/max_tmp.txt && rm ${outputDir}/max_tmp.txt
+
     # add the max value to subcort, theshold out areas that should be 0
-    cmd="${FSLDIR}/bin/fslmaths \
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${outputDir}/${subj}_subcort_mask.nii.gz \
+    #        -add ${maxCortical} \
+    #        -thr $(( ${maxCortical} + 1 ))
+    #        ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mris_calc \
+            -o ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
             ${outputDir}/${subj}_subcort_mask.nii.gz \
-            -add ${maxCortical} \
-            -thr $(( ${maxCortical} + 1 ))
+            add ${maxCortical} \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+
+    cmd="${FREESURFER_HOME}/bin/mri_threshold \
             ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
-            -odt int \
+            $(( ${maxCortical} + 1 )) \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
         "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
     # add in the re-numbered subcortical
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        -add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="${FREESURFER_HOME}/bin/mris_calc \
+        -o ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+        add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
+    "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
