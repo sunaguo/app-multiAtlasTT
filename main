@@ -1,22 +1,41 @@
 #!/bin/bash
 
-set -e
+# dependencies:
+# python2.7 with numpy and nibabel
+# FreeSurfer
+# altas GCS data, which is automatically downloaded from figShare
 
-INPUT_DIR=$1
-#INPUT_DIR=`jq -r '.fsin' config.json`
+####################################################################
+####################################################################
+
+##for testing
+#set -e
+#INPUT_DIR=$1
+
+####################################################################
+####################################################################
+# capture inputs from config
+# TODO: capture input about which atlas to create. right now its  
+# setup to just do all 10
+
+INPUT_DIR=`jq -r '.fsin' config.json`
 #OUTPUT_DIR=`jq -r '' config.json`
 OUTPUT_DIR='out'
 #FS_VERSION=`jq -r '.' config.json`
 FS_VERSION='6p0'
 
-mkdir -p ${PWD}/${OUTPUT_DIR}
-
 ####################################################################
 ####################################################################
+# setup FREESURFER
+# TODO: setup in a more general way. right now, this will work if the
+# modules enviorment system being used
 
-# setup FSL & FREESURFER
-# module load fsl
-module load freesurfer
+# note, make sure you use the verison of FreeSurfer that you 
+# actually want...
+if [[ -z ${FREESURFER_HOME} ]]
+then
+    module load freesurfer
+fi
 
 ####################################################################
 ####################################################################
@@ -31,11 +50,10 @@ export scriptBaseDir=${PWD}
 
 export atlasList="nspn500 gordon333 yeo17 hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
 
-export atlasList="yeo17 "
-
-
 ####################################################################
 ####################################################################
+
+mkdir -p ${PWD}/${OUTPUT_DIR}
 
 # fetch the data, if it does not already exist
 gcsMissing=0
@@ -77,15 +95,17 @@ fi
 
 touch ${PWD}/${OUTPUT_DIR}/log.txt
 
+echo "running maTT2"
+# run it
 cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
         -d ${INPUT_DIR} \
         -o ${PWD}/${OUTPUT_DIR}/ \
         -f ${FS_VERSION} \
     "
 echo $cmd 
-eval $cmd | tee -a ${OUT}
+eval $cmd | tee -a ${PWD}/${OUTPUT_DIR}/log.txt
 
-
+echo "finished maTT2 with status: $?"
 
 
 
