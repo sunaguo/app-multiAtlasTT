@@ -272,7 +272,7 @@ do
         ln -s ${outputDir}/${atlas}/lh.${atlas}.annot ${tempFSSubj}/label/lh.${atlas}.annot
         ln -s ${outputDir}/${atlas}/rh.${atlas}.annot ${tempFSSubj}/label/rh.${atlas}.annot
         # and link the LUT to the output
-        ln -s ${atlasBaseDir}/${atlas}/LUT_${atlas}.txt ${outputDir}/${atlas}/LUT_${atlas}.txt
+        ln -s ${atlasBaseDir}/${atlas}/LUT_${atlas}.txt ${outputDir}/${atlas}/LUT_${atlas}.txt || cp ${atlasBaseDir}/${atlas}/LUT_${atlas}.txt ${outputDir}/${atlas}/LUT_${atlas}.txt
     fi
 
     # mri_aparc2aseg
@@ -315,7 +315,8 @@ then
     echo "problem. could not read subjAparcAseg: ${subjAparcAseg}"
     exit 1
 else
-    ln -s ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_ln.nii.gz 
+    # add or incase cannot do soft link
+    ln -s ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_ln.nii.gz || cp ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_ln.nii.gz
 fi
 
 ####################################################################
@@ -420,8 +421,7 @@ do
     log $cmd >> $OUT
     eval $cmd
 
-    # TODO could remove files here... uncomment when checked
-    #ls ${outputDir}/tmp_mask?.nii.gz && rm ${outputDir}/tmp_mask?.nii.gz
+    ls ${outputDir}/tmp_mask?.nii.gz && rm ${outputDir}/tmp_mask?.nii.gz
 
     # look at only cortical
     cmd="${FREESURFER_HOME}/bin/mri_mask \
@@ -445,7 +445,7 @@ do
     #  labs_file = str(argv[3])
     cmd="python2.7 ${scriptBaseDir}/src/maTT_remap.py \
             ${atlasOutputDir}/${atlas}.nii.gz \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+            ${atlasOutputDir}/${atlas}_remap.nii.gz \
             ${atlasOutputDir}/LUT_${atlas}.txt \
         "
     echo $cmd
@@ -458,23 +458,23 @@ do
 
     # remove any stuff in area of subcortical (shouldnt be there anyways...)
     #cmd="${FSLDIR}/bin/fslmaths \
-    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
     #        -mas ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
-    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
     #        -odt int \
     #    "
     cmd="${FREESURFER_HOME}/bin/mri_mask \
-        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+        ${atlasOutputDir}/${atlas}_remap.nii.gz \
         ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
-        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+        ${atlasOutputDir}/${atlas}_remap.nii.gz \
     "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
     # get the max value from cortical atlas image
-    # maxCortical=$(fslstats ${atlasOutputDir}/${atlas}_rmap.nii.gz -R | awk '{print int($2)}')
-    ${FREESURFER_HOME}/bin/mris_calc -o ${outputDir}/max_tmp.txt ${atlasOutputDir}/${atlas}_rmap.nii.gz max
+    # maxCortical=$(fslstats ${atlasOutputDir}/${atlas}_remap.nii.gz -R | awk '{print int($2)}')
+    ${FREESURFER_HOME}/bin/mris_calc -o ${outputDir}/max_tmp.txt ${atlasOutputDir}/${atlas}_remap.nii.gz max
     maxCortical=$( cat ${outputDir}/max_tmp.txt | awk '{print int($1)}')
     ls ${outputDir}/max_tmp.txt && rm ${outputDir}/max_tmp.txt
 
@@ -506,14 +506,14 @@ do
 
     # add in the re-numbered subcortical
     #cmd="${FSLDIR}/bin/fslmaths \
-    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
     #        -add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
-    #        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
     #        -odt int \
     #    "
     cmd="${FREESURFER_HOME}/bin/mris_calc \
-        -o ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-        ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+        -o ${atlasOutputDir}/${atlas}_remap.nii.gz \
+        ${atlasOutputDir}/${atlas}_remap.nii.gz \
         add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
     "
     echo $cmd
