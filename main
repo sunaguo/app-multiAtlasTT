@@ -74,8 +74,9 @@ done
 
 if [[ ${gcsMissing} -eq 1 ]]
 then
-    wget -q https://ndownloader.figshare.com/files/10791467
-    tar -vxf 10791467
+    wget -q -O figShareDL https://ndownloader.figshare.com/files/11492165
+    tar -vxf figShareDL
+    rm figShareDL
 else
     echo "gcs data already present"
 fi
