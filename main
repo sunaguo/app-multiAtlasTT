@@ -23,6 +23,7 @@ INPUT_DIR=`jq -r '.fsin' config.json`
 OUTPUT_DIR='out'
 #FS_VERSION=`jq -r '.' config.json`
 FS_VERSION='6p0'
+export atlasList=`jq -r '.atlas' config.json`
 
 ####################################################################
 ####################################################################
@@ -48,7 +49,8 @@ export scriptBaseDir=${PWD}
 # schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 
 # schaefer1000-yeo17
 
-export atlasList="nspn500 gordon333 yeo17 hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
+# actually read in atlast list from user input
+# export atlasList="nspn500 gordon333 yeo17 hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
 
 ####################################################################
 ####################################################################
