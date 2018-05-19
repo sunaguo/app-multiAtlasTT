@@ -5,8 +5,6 @@
 # FreeSurfer
 # altas GCS data, which is automatically downloaded from figShare
 
-module load singularity 2> /dev/null
-#module load anaconda2/4.2.0 
 
 ####################################################################
 ####################################################################
