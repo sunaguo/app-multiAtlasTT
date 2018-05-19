@@ -23,7 +23,13 @@ INPUT_DIR=`jq -r '.fsin' config.json`
 OUTPUT_DIR='out'
 #FS_VERSION=`jq -r '.' config.json`
 FS_VERSION='6p0'
-export atlasList=`jq -r '.atlas' config.json`
+atlasList=`jq -r '.atlas' config.json`
+
+if [[ ${atlasList} == 'null' ]] || [[ ${atlasList} == 'all' ]] 
+then
+    atlasList=''
+fi
+export atlasList 
 
 ####################################################################
 ####################################################################
