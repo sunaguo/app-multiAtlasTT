@@ -5,7 +5,7 @@
 # FreeSurfer
 # altas GCS data, which is automatically downloaded from figShare
 
-module load anaconda2/4.2.0 
+#module load anaconda2/4.2.0 
 
 ####################################################################
 ####################################################################
