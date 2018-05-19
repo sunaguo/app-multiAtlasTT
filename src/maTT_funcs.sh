@@ -262,5 +262,62 @@ dilate_cortex()
 
 }
 
+remap_parc()
+{
+
+    i_file=$1
+    o_file=$2
+    labs_file=$3
+
+    # initialize remp file
+    > ${o_file}_remapKey.txt
+
+    # get labs from first colum of LUT table
+    labs=($( cat ${labs_file} | awk '{print $1}' ))
+
+    # make a blank file
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            --i ${i_file} \
+            --min 0 --max 0 --binval 0 \
+            --o ${o_file}_tmp.nii.gz \
+        "    
+    eval $cmd #execute the command
+
+    for (( lll=0 ; lll < ${#labs[@]} ; lll++ ))
+    do
+        
+        echo $lll
+
+        labelVal=${labs[${lll}]}
+        newVal=$(( lll + 1 ))
+
+        cmd="${FREESURFER_HOME}/bin/mri_binarize \
+                --i ${i_file} \
+                --match ${labelVal} --binval ${newVal} --binvalnot 0 \
+                --o ${o_file}_tmp_${newVal}.nii.gz \
+            "
+        eval $cmd #execute the command            
+        
+        # add to the new remapped image  
+        cmd="${FREESURFER_HOME}/bin/mris_calc \
+                --output ${o_file}_tmp.nii.gz \
+                ${o_file}_tmp.nii.gz \
+                add ${o_file}_tmp_${newVal}.nii.gz \           
+            "        
+        eval $cmd #execute the command            
+
+        # make the remap file too
+        echo "${labelVal} -> ${newVal}" >> ${o_file}_remapKey.txt
+
+        # remove temp file
+        rm ${o_file}_tmp_${newVal}.nii.gz
+
+    done
+
+    # new file!
+    mv ${o_file}_tmp.nii.gz ${o_file}
+
+}
+
 ##########################################################
 
