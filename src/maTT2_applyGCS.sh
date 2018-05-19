@@ -452,6 +452,13 @@ do
     log $cmd >> $OUT
     eval $cmd
 
+    # if remap is not main, exit 1
+    if [[ ! -e ${atlasOutputDir}/${atlas}_remap.nii.gz ]]
+    then
+        echo "remap output not made"
+        exit 1
+    fi
+
     ########################################
     #add the subcortical areas relabled way#
     ########################################
