@@ -27,7 +27,7 @@ atlasList=`jq -r '.atlas' config.json`
 
 if [[ ${atlasList} == 'null' ]] || [[ ${atlasList} == 'all' ]] 
 then
-    atlasList=''
+    atlasList="gordon333 nspn500 yeo17 yeo17dil hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
 fi
 export atlasList 
 
