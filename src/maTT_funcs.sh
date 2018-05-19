@@ -262,6 +262,7 @@ dilate_cortex()
 
 }
 
+# experimental... option if you do not have python... but really slow
 remap_parc()
 {
 
