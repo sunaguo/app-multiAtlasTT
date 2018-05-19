@@ -21,7 +21,7 @@
 
 INPUT_DIR=`jq -r '.fsin' config.json`
 #OUTPUT_DIR=`jq -r '' config.json`
-OUTPUT_DIR='out'
+OUTPUT_DIR='output'
 #FS_VERSION=`jq -r '.' config.json`
 FS_VERSION='6p0'
 atlasList=`jq -r '.atlas' config.json`
