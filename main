@@ -117,11 +117,17 @@ echo $cmd
 eval $cmd | tee -a ${PWD}/${OUTPUT_DIR}/log.txt
 
 
+mkdir -p ${PWD}/parc
 for atlas in $atlasList
 	do
-		mv ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz ${PWD}/${OUTPUT_DIR}/parc/parc.nii.gz
-		cp $t1 ${PWD}/${OUTPUT_DIR}/parc/
+		cp ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz ${PWD}/parc/parc.nii.gz
+		cp ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt ${PWD}/parc/key.txt
+		cp ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt ${PWD}/parc/key.txt
+		cp ${PWD}/${OUTPUT_DIR}/${atlas}/LUT_${atlas}.txt ${PWD}/parc/
+		cp $t1 ${PWD}/parc/
 	done
+	
+echo "{\"tags\": [\"${atlas}\" ]}" > product.json
 
 echo "finished maTT2 with status: $?"
 
