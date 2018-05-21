@@ -27,10 +27,10 @@ FS_VERSION='6p0'
 atlasList=`jq -r '.atlas' config.json`
 t1=`jq -r '.t1' config.json`
 
-if [[ ${atlasList} == 'null' ]] || [[ ${atlasList} == 'all' ]] 
-then
-    atlasList="gordon333 nspn500 yeo17 yeo17dil hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
-fi
+#if [[ ${atlasList} == 'null' ]] || [[ ${atlasList} == 'all' ]] 
+#then
+    #atlasList="gordon333 nspn500 yeo17 yeo17dil hcp-mmp schaefer100-yeo17 schaefer200-yeo17 schaefer400-yeo17 schaefer600-yeo17 schaefer800-yeo17 schaefer1000-yeo17"
+#fi
 export atlasList 
 
 ####################################################################
@@ -119,8 +119,8 @@ eval $cmd | tee -a ${PWD}/${OUTPUT_DIR}/log.txt
 
 for atlas in $atlasList
 	do
-		mv ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz ${PWD}/${OUTPUT_DIR}/${atlas}/parc.nii.gz
-		cp $t1 ${PWD}/${OUTPUT_DIR}/${atlas}/
+		mv ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz ${PWD}/${OUTPUT_DIR}/parc/parc.nii.gz
+		cp $t1 ${PWD}/${OUTPUT_DIR}/parc/
 	done
 
 echo "finished maTT2 with status: $?"
