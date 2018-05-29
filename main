@@ -63,7 +63,7 @@ export scriptBaseDir=${PWD}
 ####################################################################
 ####################################################################
 
-mkdir -p ${PWD}/${OUTPUT_DIR}
+mkdir -p ${OUTPUT_DIR}
 
 # fetch the data, if it does not already exist
 gcsMissing=0
@@ -104,27 +104,27 @@ fi
 ####################################################################
 # go into the folder where we also want output and setup notes file!
 
-touch ${PWD}/${OUTPUT_DIR}/log.txt
+touch ${OUTPUT_DIR}/log.txt
 
 echo "running maTT2"
 # run it
 cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
         -d ${INPUT_DIR} \
-        -o ${PWD}/${OUTPUT_DIR}/ \
+        -o ${OUTPUT_DIR}/ \
         -f ${FS_VERSION}
     "
 echo $cmd 
 eval $cmd | tee -a ${PWD}/${OUTPUT_DIR}/log.txt
 
 
-mkdir -p ${PWD}/parc
+mkdir -p parc
 for atlas in $atlasList
 	do
-		cp ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz ${PWD}/parc/parc.nii.gz
-		cp ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt ${PWD}/parc/key.txt
-		cp ${PWD}/${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt ${PWD}/parc/key.txt
-		cp ${PWD}/${OUTPUT_DIR}/${atlas}/LUT_${atlas}.txt ${PWD}/parc/
-		cp $t1 ${PWD}/parc/
+		cp ${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz parc/parc.nii.gz
+		cp ${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
+		cp ${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
+		cp ${OUTPUT_DIR}/${atlas}/LUT_${atlas}.txt parc/
+		cp $t1 parc/
 	done
 	
 echo "{\"tags\": [\"${atlas}\" ]}" > product.json
