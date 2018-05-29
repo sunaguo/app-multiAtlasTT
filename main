@@ -108,6 +108,7 @@ touch ${OUTPUT_DIR}/log.txt
 
 echo "running maTT2"
 # run it
+ls
 cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
         -d ${INPUT_DIR} \
         -o ${OUTPUT_DIR}/ \
