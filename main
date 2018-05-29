@@ -109,9 +109,9 @@ touch ${PWD}/${OUTPUT_DIR}/log.txt
 echo "running maTT2"
 # run it
 cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
-        -d ${INPUT_DIR} \
+        -d ${PWD}/${INPUT_DIR} \
         -o ${PWD}/${OUTPUT_DIR}/ \
-        -f ${FS_VERSION} \
+        -f ${FS_VERSION}
     "
 echo $cmd 
 eval $cmd | tee -a ${PWD}/${OUTPUT_DIR}/log.txt
