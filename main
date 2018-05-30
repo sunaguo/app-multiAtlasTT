@@ -84,7 +84,7 @@ done
 
 if [[ ${gcsMissing} -eq 1 ]]
 then
-    wget -q -O figShareDL https://ndownloader.figshare.com/files/11492165
+    wget -q -O figShareDL https://ndownloader.figshare.com/files/11768399
     tar -vxf figShareDL
     rm figShareDL
 else
