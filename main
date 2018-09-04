@@ -21,7 +21,7 @@
 
 INPUT_DIR=`jq -r '.fsin' config.json`
 #OUTPUT_DIR=`jq -r '' config.json`
-OUTPUT_DIR='output'
+OUTPUT_DIR=${PWD}/output
 #FS_VERSION=`jq -r '.' config.json`
 FS_VERSION='6p0'
 atlasList=`jq -r '.atlas' config.json`
@@ -43,7 +43,7 @@ then
 fi
 
 # make sure that FS will run with the licence
-[ -z "$FREESURFER_LICENSE" ] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
+[[ -z "$FREESURFER_LICENSE" ]] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
 
 ####################################################################
 ####################################################################
@@ -82,7 +82,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [[ ${useSingulairty}=="yes" ]] 
 then
-   echo "data should be inside contained"
+   echo "data should be inside container"
 else
 
 	# fetch the data, if it does not already exist
@@ -123,7 +123,7 @@ touch ${OUTPUT_DIR}/log.txt
 echo "running maTT2"
 
 # run it
-echo $INPUT_DIR
+echo "${INPUT_DIR}"
 echo "${OUTPUT_DIR}"
 cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
 	-d ${INPUT_DIR} \
