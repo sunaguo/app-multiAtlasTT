@@ -134,7 +134,7 @@ echo $cmd
 
 if [[ ${useSingulairty}=="yes" ]] 
 then
-    singularity exec --writable -e docker://brainlife/freesurfer:6.0.0 bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
+    singularity exec --writable -e docker://faskowit/app-multiatlastt bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
 else
     eval $cmd | tee -a ${PWD}/${OUTPUT_DIR}/log.txt
 fi
