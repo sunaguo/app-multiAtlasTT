@@ -43,3 +43,6 @@ Thumbs.db
 *.gz
 *out/*
 *test/*
+
+config.json
+
