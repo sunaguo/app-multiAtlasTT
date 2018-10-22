@@ -366,6 +366,9 @@ then
 
 fi
 
+## add whole brain mask based on aseg.mgz
+mri_binarize --i ${tempFSSubj}/mri/aseg.mgz --match 2 3 7 8 10 11 12 13 16 17 18 24 26 28 30 31 41 42 46 47 49 50 51 52 53 54 58 60 62 63 77 85 251 252 253 254 255 --o ${atlasOutputDir}/mask.nii.gz
+
 ####################################################################
 ####################################################################
 # loop through atlasList again to get rid of extra areas and to add 

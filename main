@@ -153,6 +153,7 @@ for atlas in $atlasList
 		cp ${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
 		cp ${OUTPUT_DIR}/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
 		cp ${OUTPUT_DIR}/${atlas}/LUT_${atlas}.txt parc/
+		cp ${OUTPUT_DIR}/${atlas}/mask.nii.gz parc/mask.nii.gz
 		cp $t1 parc/
 	done
 	
