@@ -15,6 +15,27 @@ log()
 
 ##########################################################
 
+get_mask_frm_aparcAseg()
+{
+    # inputs
+    local iAparcAseg=$1
+    local oDir=$2
+    local subj=$3
+
+    ## add whole brain mask based on aseg.mgz
+    #mri_binarize --i ${tempFSSubj}/mri/aseg.mgz --match 2 3 7 8 10 11 12 13 16 17 18 24 26 28 30 31 41 42 46 47 49 50 51 52 53 54 58 60 62 63 77 85 251 252 253 254 255 --o ${outputDir}/mask.nii.gz
+
+    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+            --i ${iAparcAseg} \
+            --match 2 3 7 8 10 11 12 13 16 17 18 24 26 28 30 31 41 42 46 47 49 50 51 52 53 54 58 60 62 63 77 85 251 252 253 254 255 \
+            --o ${oDir}/bmask.nii.gz \
+        "    
+    echo $cmd #state the command
+    log $cmd >> $OUT
+    eval $cmd #execute the command
+
+}
+
 get_subcort_frm_aparcAseg()
 {
     # inputs
