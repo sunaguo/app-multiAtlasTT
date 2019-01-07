@@ -134,9 +134,7 @@ for atlas in $atlasList
 	do
 		cp output/${atlas}/${atlas}_remap.nii.gz parc/parc.nii.gz
 		cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
-		#cp ${OUTPUT_DIR}/${atlas}/LUT_${atlas}.txt parc/
-		cp ${OUTPUT_DIR}/mask.nii.gz mask/mask.nii.gz
-		#cp $t1 parc/
+		cp output/mask.nii.gz mask/mask.nii.gz
 	done
 	
 echo "{\"tags\": [\"${atlas}\" ]}" > product.json
