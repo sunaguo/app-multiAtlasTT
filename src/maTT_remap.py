@@ -30,7 +30,7 @@ def main():
     o_data = np.zeros(i_data.shape,dtype=np.int32)
 
     # print remap to file
-    f = open(str(o_file +'_remap.txt'),'w')
+    f = open(str(o_file +'_remapKey.txt'),'w')
     
     # loop over the labs
     for x in xrange(0,len(labs)):
