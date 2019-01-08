@@ -120,7 +120,7 @@ then
     export SINGULARITYENV_atlasList=${atlasList}
     export SINGULARITYENV_atlasBaseDir=${atlasBaseDir}
     export SINGULARITYENV_scriptBaseDir=${scriptBaseDir}
-    singularity exec --writable -e docker://faskowit/app-multiatlastt bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
+    singularity exec --writable -e docker://faskowit/app-multiatlastt:0.0.2 bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
 else
     eval $cmd | tee -a log.txt
 fi
