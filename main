@@ -18,7 +18,8 @@ set -x
 INPUT_DIR=`jq -r '.fsin' config.json`
 FS_VERSION='6p0'
 atlasList=`jq -r '.atlas' config.json`
-t1=`jq -r '.t1' config.json`
+# no need to read in t1 for now...
+# t1=`jq -r '.t1' config.json`
 
 export atlasList 
 
