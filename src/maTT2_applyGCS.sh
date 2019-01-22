@@ -207,6 +207,7 @@ cp -asv ${inputFSDir}/surf/?h.pial ${tempFSSubj}/surf/
 cp -asv ${inputFSDir}/surf/?h.smoothwm ${tempFSSubj}/surf/
 cp -asv ${inputFSDir}/surf/?h.sulc ${tempFSSubj}/surf/
 cp -asv ${inputFSDir}/surf/?h.thickness ${tempFSSubj}/surf/
+cp -asv ${inputFSDir}/surf/?h.inflated ${tempFSSubj}/surf/
 
 # label
 cp -asv ${inputFSDir}/label/?h.cortex.label ${tempFSSubj}/label/
@@ -317,8 +318,8 @@ then
     echo "problem. could not read subjAparcAseg: ${subjAparcAseg}"
     exit 1
 else
-    # add or incase cannot do soft link
-    ln -s ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_ln.nii.gz || cp ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_ln.nii.gz
+    cp ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_cp.nii.gz
+    subjAparcAseg=${outputDir}/subj_aparc+aseg_cp.nii.gz
 fi
 
 ####################################################################
@@ -401,10 +402,45 @@ then
 
 fi
 
-get_mask_frm_aparcAseg \
-    ${subjAparcAseg} \
-    ${outputDir} \
-    ${subj}
+if [[ ! -e ${outputDir}/bmask.nii.gz ]]
+then
+
+    # function inputs:
+    #   aparc+aseg
+    #   out directory
+    #   subj variable, to name output files
+
+    # function output files:
+    #   bmask.nii.gz
+    #   mask.nii.gz
+
+   get_mask_frm_aparcAseg \
+      ${subjAparcAseg} \
+      ${outputDir} \
+      ${subj}
+
+fi
+
+# save the gii files for the annot.gii output
+if [[ -! e ${outputDir}/rh.inflated.gii ]]
+then
+
+    cmd="${FREESURFER_HOME}/bin/mris_convert \
+	    ${tempFSSubj}/surf/lh.inflated \
+	    ${outputDir}/lh.inflated.gii \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    cmd="${FREESURFER_HOME}/bin/mris_convert \
+	    ${tempFSSubj}/surf/rh.inflated \
+	    ${outputDir}/rh.inflated.gii \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+
+fi
 
 ####################################################################
 ####################################################################
@@ -570,9 +606,31 @@ do
     # remove temp files
     ls ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz && rm ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz 
 
-done
+    ###########################
+    # make a gii of the annot #
+    ###########################
 
-mri_binarize --i ${outputDir}/bmask.nii.gz --min 1 --merge ${outputDir}/output_cortical_mask.nii.gz --o ${outputDir}/mask.nii.gz
+    # lh
+    cmd="${FREESURFER_HOME}/bin/mris_convert \
+            --annot ${atlasOutputDir}/lh.${atlas}.annot \
+	    ${tempFSSubj}/surf/lh.white \
+	    ${atlasOutputDir}/lh.${atlas}.annot.gii \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    
+    # rh
+    cmd="${FREESURFER_HOME}/bin/mris_convert \
+            --annot ${atlasOutputDir}/rh.${atlas}.annot \
+	    ${tempFSSubj}/surf/rh.white \
+	    ${atlasOutputDir}/rh.${atlas}.annot.gii \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+
+done
 
 # delete extra stuff
 # the temp fsDirectory we setup at very beginning
