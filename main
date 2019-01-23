@@ -132,11 +132,12 @@ fi
 
 mkdir -p parc mask
 for atlas in $atlasList
-	do
-		cp output/${atlas}/${atlas}_remap.nii.gz parc/parc.nii.gz
-		cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
-		cp output/mask.nii.gz mask/mask.nii.gz
-	done
+do
+    cp output/${atlas}/${atlas}_remap.nii.gz parc/parc.nii.gz
+    cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
+    cp output/mask.nii.gz mask/mask.nii.gz
+    cp output/*gii parc/
+done
 	
 echo "{\"tags\": [\"${atlas}\" ]}" > product.json
 
