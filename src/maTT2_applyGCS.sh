@@ -422,7 +422,7 @@ then
 fi
 
 # save the gii files for the annot.gii output
-if [[ -! e ${outputDir}/rh.inflated.gii ]]
+if [[ ! -e ${outputDir}/rh.inflated.gii ]]
 then
 
     cmd="${FREESURFER_HOME}/bin/mris_convert \
