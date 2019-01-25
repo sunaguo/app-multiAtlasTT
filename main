@@ -130,13 +130,22 @@ fi
 ####################################################################
 # output handling
 
-mkdir -p parc mask
+mkdir -p parc-vol parc-surf mask
 for atlas in $atlasList
 do
-    cp output/${atlas}/${atlas}_remap.nii.gz parc/parc.nii.gz
-    cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
+    # parc-vol
+    cp output/${atlas}/${atlas}_remap.nii.gz parc-vol/parc.nii.gz
+    cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc-vol/key.txt
+    
+    # parc-surf
+    cp output/lh.inflated.gii parc-surf/lh.parc.inflated.gii
+    cp output/rh.inflated.gii parc-surf/rh.parc.inflated.gii
+    cp output/${atlas}/lh.${atlas}.annot.gii parc-surf/lh.parc.annot.gii
+    cp output/${atlas}/rh.${atlas}.annot.gii parc-surf/rh.parc.annot.gii
+    cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc-surf/key.txt
+    
+    # mask
     cp output/mask.nii.gz mask/mask.nii.gz
-    cp output/*gii parc/
 done
 	
 echo "{\"tags\": [\"${atlas}\" ]}" > product.json
