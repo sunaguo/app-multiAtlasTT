@@ -425,20 +425,25 @@ fi
 if [[ ! -e ${outputDir}/rh.inflated.gii ]]
 then
 
-    cmd="${FREESURFER_HOME}/bin/mris_convert \
-	    ${tempFSSubj}/surf/lh.inflated \
-	    ${outputDir}/lh.inflated.gii \
-        "
-    echo $cmd
-    log $cmd >> $OUT
-    eval $cmd
-    cmd="${FREESURFER_HOME}/bin/mris_convert \
-	    ${tempFSSubj}/surf/rh.inflated \
-	    ${outputDir}/rh.inflated.gii \
-        "
-    echo $cmd
-    log $cmd >> $OUT
-    eval $cmd
+    for surfname in inflated pial white 
+    do
+
+        cmd="${FREESURFER_HOME}/bin/mris_convert \
+	        ${tempFSSubj}/surf/lh.${surfname} \
+	        ${outputDir}/lh.${surfname}.gii \
+            "
+        echo $cmd
+        log $cmd >> $OUT
+        eval $cmd
+        cmd="${FREESURFER_HOME}/bin/mris_convert \
+	        ${tempFSSubj}/surf/rh.${surfname} \
+	        ${outputDir}/rh.${surfname}.gii \
+            "
+        echo $cmd
+        log $cmd >> $OUT
+        eval $cmd
+    
+    done
 
 fi
 
