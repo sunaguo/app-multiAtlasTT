@@ -138,8 +138,11 @@ do
     cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc-vol/key.txt
     
     # parc-surf
-    cp output/lh.inflated.gii parc-surf/lh.parc.inflated.gii
-    cp output/rh.inflated.gii parc-surf/rh.parc.inflated.gii
+    for surfname in inflated pial white
+    do
+        cp output/lh.${surfname}.gii parc-surf/lh.parc.${surfname}.gii
+        cp output/rh.${surfname}.gii parc-surf/rh.parc.${surfname}.gii
+    done
     cp output/${atlas}/lh.${atlas}.annot.gii parc-surf/lh.parc.annot.gii
     cp output/${atlas}/rh.${atlas}.annot.gii parc-surf/rh.parc.annot.gii
     cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc-surf/key.txt
