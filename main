@@ -38,6 +38,7 @@ fi
 
 # make sure that FS will run with the licence
 [[ -z "$FREESURFER_LICENSE" ]] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
+echo $FREESURFER_LICENSE > license.txt
 
 ####################################################################
 ####################################################################
@@ -121,7 +122,8 @@ then
     export SINGULARITYENV_atlasList=${atlasList}
     export SINGULARITYENV_atlasBaseDir=${atlasBaseDir}
     export SINGULARITYENV_scriptBaseDir=${scriptBaseDir}
-    singularity exec --writable -e docker://faskowit/app-multiatlastt:0.0.2 bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
+    #singularity exec --writable -e docker://faskowit/app-multiatlastt:0.0.2 bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
+    singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://faskowit/app-multiatlastt:0.0.2 $cmd
 else
     eval $cmd | tee -a log.txt
 fi
