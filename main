@@ -22,21 +22,6 @@ t1=`jq -r '.t1' config.json`
 
 export atlasList 
 
-####################################################################
-####################################################################
-# setup FREESURFER
-# TODO: setup in a more general way. right now, this will work if the
-# modules enviorment system being used
-
-# note, make sure you use the verison of FreeSurfer that you 
-# actually want...
-if [[ -z ${FREESURFER_HOME} ]]
-then
-    module load freesurfer
-fi
-
-# make sure that FS will run with the licence
-[[ -z "$FREESURFER_LICENSE" ]] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
 
 ####################################################################
 ####################################################################
@@ -120,8 +105,14 @@ then
     export SINGULARITYENV_atlasList=${atlasList}
     export SINGULARITYENV_atlasBaseDir=${atlasBaseDir}
     export SINGULARITYENV_scriptBaseDir=${scriptBaseDir}
-    singularity exec --writable -e docker://faskowit/app-multiatlastt bash -c "echo $FREESURFER_LICENSE > /usr/local/freesurfer/license.txt && $cmd"
+
+    [[ -z "$FREESURFER_LICENSE" ]] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
+    echo $FREESURFER_LICENSE > license.txt
+
+    #singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://faskowit/app-multiatlastt:0.0.5 $cmd
+    singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://soichih/app-multiatlastt:0.0.5 $cmd
 else
+    module load freesurfer
     eval $cmd | tee -a log.txt
 fi
 
@@ -133,31 +124,12 @@ mkdir -p parc mask
 for atlas in $atlasList
 	do
 		cp output/${atlas}/${atlas}_remap.nii.gz parc/parc.nii.gz
-		cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt
+		cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc/key.txt #deprecated by label.json
+		cp output/${atlas}/${atlas}_remap.nii.gz_label.json parc/label.json
 		cp output/mask.nii.gz mask/mask.nii.gz
 	done
 	
 echo "{\"tags\": [\"${atlas}\" ]}" > product.json
 
 echo "finished maTT2 with status: $?"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

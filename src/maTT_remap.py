@@ -12,6 +12,7 @@ See LICENSE file for license
 import numpy as np
 import nibabel as nib
 from sys import argv
+import json
 
 def main():
 
@@ -28,18 +29,20 @@ def main():
 
     # init o_data
     o_data = np.zeros(i_data.shape,dtype=np.int32)
+        
+    labels=[]
 
     # print remap to file
-    f = open(str(o_file +'_remapKey.txt'),'w')
-    
-    # loop over the labs
-    for x in xrange(0,len(labs)):
-        print(x)
-        w = np.where(i_data == int(labs[x]))
-        o_data[w[0],w[1],w[2]] = (x + 1)
-        f.write( "{}\t->\t{}\t== {} \n".format(  str(labs[x]), str(x + 1), str(names[x]) ) ) 
+    with open(o_file+'_remapKey.txt','w') as f:
+        for x in range(0,len(labs)):
+            w = np.where(i_data == int(labs[x]))
+            o_data[w[0],w[1],w[2]] = (x + 1)
 
-    f.close()
+            f.write( "{}\t->\t{}\t== {} \n".format(str(labs[x]), str(x + 1), str(names[x]) ) ) 
+            labels.append({'name': names[x], 'label': labs[x], 'voxel_value': (x+1)})
+
+    with open(o_file+'_label.json','w') as labeljson:
+        json.dump(labels, labeljson)
 
     # save output
     o_img = nib.Nifti1Image(o_data, i_img.get_affine())
