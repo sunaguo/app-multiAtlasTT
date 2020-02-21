@@ -109,8 +109,7 @@ then
     [[ -z "$FREESURFER_LICENSE" ]] && echo "Please set FREESURFER_LICENSE in .bashrc" && exit 1;
     echo $FREESURFER_LICENSE > license.txt
 
-    #singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://faskowit/app-multiatlastt:0.0.5 $cmd
-    singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://soichih/app-multiatlastt:0.0.5 $cmd
+    singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://faskowit/app-multiatlastt:0.0.5 $cmd
 else
     module load freesurfer
     eval $cmd | tee -a log.txt
