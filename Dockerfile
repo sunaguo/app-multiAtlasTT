@@ -5,6 +5,6 @@ MAINTAINER Joshua Faskowitz <jfaskowi@iu.edu>
 RUN apt-get update && apt-get install -y python3 python3-pip wget
 RUN pip3 install nibabel six
 
-RUN wget -q -O - https://ndownloader.figshare.com/files/14037086 | tar -xz
+RUN wget -q -O - https://ndownloader.figshare.com/files/21803271 | tar -xz
 
 
