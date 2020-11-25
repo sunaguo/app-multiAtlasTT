@@ -96,7 +96,7 @@ else
 	if [[ ${gcsMissing} -eq 1 ]]
 	then
 	    echo "downloading data from figshare"
-	    wget -q -O figShareDL https://ndownloader.figshare.com/files/21803271
+	    wget -q -O figShareDL https://ndownloader.figshare.com/files/25079594
 	    tar -vxf figShareDL
 	    rm figShareDL
 	    echo "finished downloading from figshare"
