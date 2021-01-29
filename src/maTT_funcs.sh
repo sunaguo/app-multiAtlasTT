@@ -25,7 +25,7 @@ get_mask_frm_aparcAseg()
     ## add whole brain mask based on aseg.mgz
     #mri_binarize --i ${tempFSSubj}/mri/aseg.mgz --match 2 3 7 8 10 11 12 13 16 17 18 24 26 28 30 31 41 42 46 47 49 50 51 52 53 54 58 60 62 63 77 85 251 252 253 254 255 --o ${outputDir}/mask.nii.gz
 
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
             --i ${iAparcAseg} \
             --match 2 3 7 8 10 11 12 13 16 17 18 24 26 28 30 31 41 42 46 47 49 50 51 52 53 54 58 60 62 63 77 85 251 252 253 254 255 \
             --o ${oDir}/bmask.nii.gz \
@@ -35,7 +35,7 @@ get_mask_frm_aparcAseg()
     eval $cmd #execute the command
     
     # make a cortical mask really fast
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
             --i ${iAparcAseg} \
 	    --min 1000 --max 2999 \
             --o ${oDir}/tmp.nii.gz \
@@ -44,7 +44,7 @@ get_mask_frm_aparcAseg()
     log $cmd >> $OUT
     eval $cmd #execute the command
     
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
     		--i ${oDir}/bmask.nii.gz --min 1 \
 		--merge ${oDir}/tmp.nii.gz \
 		--o ${oDir}/mask.nii.gz \
@@ -70,7 +70,7 @@ get_subcort_frm_aparcAseg()
     #        ${oDir}/${subj}_subcort_mask.nii.gz \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
             --i ${iAparcAseg} \
             --min 0 --max 0 --binval 0 \
             --o ${oDir}/${subj}_subcort_mask.nii.gz \
@@ -110,7 +110,7 @@ get_subcort_frm_aparcAseg()
 		#        -thr ${getLabel} -uthr ${getLabel} \
         #        -binv \
         #        ${oDir}/${subj}temp${getIndex}.nii.gz"		
-        cmd="${FREESURFER_HOME}/bin/mri_binarize \
+        cmd="mri_binarize \
                 --i ${iAparcAseg} \
                 --match ${getLabel} --binval 0 --binvalnot 1 \
                 --o ${oDir}/${subj}temp${getIndex}.nii.gz \
@@ -125,7 +125,7 @@ get_subcort_frm_aparcAseg()
 		#        -mas ${oDir}/${subj}temp${getIndex}.nii.gz \
 		#        ${oDir}/${subj}_subcort_mask.nii.gz \
         #    "
-        cmd="${FREESURFER_HOME}/bin/mri_mask \
+        cmd="mri_mask \
                 ${oDir}/${subj}_subcort_mask.nii.gz \
                 ${oDir}/${subj}temp${getIndex}.nii.gz \
                 ${oDir}/${subj}_subcort_mask.nii.gz \
@@ -140,7 +140,7 @@ get_subcort_frm_aparcAseg()
         #        -binv \
 		#        -mul ${getIndex} \
 		#        ${oDir}/${subj}temp${getIndex}.nii.gz"		
-        cmd="${FREESURFER_HOME}/bin/mri_binarize \
+        cmd="mri_binarize \
                 --i ${oDir}/${subj}temp${getIndex}.nii.gz \
                 --match 1 --binval 0 --binvalnot ${getIndex} \
                 --o ${oDir}/${subj}temp${getIndex}.nii.gz \        
@@ -156,7 +156,7 @@ get_subcort_frm_aparcAseg()
 		#        ${oDir}/${subj}_subcort_mask.nii.gz \
         #        -odt int \
         #    "
-        cmd="${FREESURFER_HOME}/bin/mris_calc \
+        cmd="mris_calc \
                 --output ${oDir}/${subj}_subcort_mask.nii.gz \
                 ${oDir}/${subj}temp${getIndex}.nii.gz \
                 add ${oDir}/${subj}_subcort_mask.nii.gz \           
@@ -173,7 +173,7 @@ get_subcort_frm_aparcAseg()
 	#        ${oDir}/${subj}_subcort_mask_binv.nii.gz \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
             --i ${oDir}/${subj}_subcort_mask.nii.gz \
             --min 1 --inv \
             --o ${oDir}/${subj}_subcort_mask_binv.nii.gz \
@@ -204,7 +204,7 @@ dilate_cortex()
 	#        ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
             --i ${iSubcortMask} \
             --min 1 --inv \
             --o ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
@@ -219,7 +219,7 @@ dilate_cortex()
     #        ${tmpDir}/subcort_tmp.nii.gz \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_mask \
+    cmd="mri_mask \
             ${iCort} ${iSubcortMask} ${tmpDir}/subcort_tmp.nii.gz \
         "
     echo $cmd
@@ -232,7 +232,7 @@ dilate_cortex()
     #        ${tmpDir}/cort_tmp.nii.gz \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_mask \
+    cmd="mri_mask \
             ${iCort} ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
             ${tmpDir}/cort_tmp.nii.gz \
         "    
@@ -264,7 +264,7 @@ dilate_cortex()
     #        ${tmpDir}/cort_tmp2.nii.gz \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_mask \
+    cmd="mri_mask \
             ${tmpDir}/cort_tmp2.nii.gz ${iCortMask} \
             ${tmpDir}/cort_tmp2.nii.gz \
         "      
@@ -280,14 +280,14 @@ dilate_cortex()
     #        ${iCort} \
     #        -odt int \
     #    "
-    cmd="${FREESURFER_HOME}/bin/mri_mask \
+    cmd="mri_mask \
             ${tmpDir}/cort_tmp2.nii.gz ${tmpDir}/subcort_mask_inv_tmp.nii.gz \
             ${tmpDir}/cort_tmp2.nii.gz \
         "      
     echo $cmd
     eval $cmd
 
-    cmd="${FREESURFER_HOME}/bin/mris_calc \
+    cmd="mris_calc \
             --output ${iCort} \
             ${tmpDir}/cort_tmp2.nii.gz \
             add ${tmpDir}/subcort_tmp.nii.gz \           
@@ -318,7 +318,7 @@ remap_parc()
     labs=($( cat ${labs_file} | awk '{print $1}' ))
 
     # make a blank file
-    cmd="${FREESURFER_HOME}/bin/mri_binarize \
+    cmd="mri_binarize \
             --i ${i_file} \
             --min 0 --max 0 --binval 0 \
             --o ${o_file}_tmp.nii.gz \
@@ -333,7 +333,7 @@ remap_parc()
         labelVal=${labs[${lll}]}
         newVal=$(( lll + 1 ))
 
-        cmd="${FREESURFER_HOME}/bin/mri_binarize \
+        cmd="mri_binarize \
                 --i ${i_file} \
                 --match ${labelVal} --binval ${newVal} --binvalnot 0 \
                 --o ${o_file}_tmp_${newVal}.nii.gz \
@@ -341,7 +341,7 @@ remap_parc()
         eval $cmd #execute the command            
         
         # add to the new remapped image  
-        cmd="${FREESURFER_HOME}/bin/mris_calc \
+        cmd="mris_calc \
                 --output ${o_file}_tmp.nii.gz \
                 ${o_file}_tmp.nii.gz \
                 add ${o_file}_tmp_${newVal}.nii.gz \           
