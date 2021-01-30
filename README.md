@@ -1,6 +1,6 @@
 # app-multiAtlasTT
 
-ver 0.0.8 
+ver 0.0.8
 
 [brainlife.io](https://brainlife.io/) version of multi atlas transfer tools (maTT). This app takes in a completed `recon-all` FreeSurfer directory, and outputs a volumetric parcellation in the indiviual's T1w space. These tools warp the parcellations to the subject space using the warp information provided by FreeSurfer. This is an implemenation of maTT2, which uses the gcs files trained on the [mindboggle-101](https://mindboggle.info/data) data. The GCS files are automatically pulled from the [maTT fishare directory](https://figshare.com/articles/multiAtlasTT_data/5998583/1) if not present locally. 
 
