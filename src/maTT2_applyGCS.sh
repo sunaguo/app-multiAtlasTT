@@ -583,7 +583,35 @@ do
     log $cmd >> $OUT
     eval $cmd
 
-    cmd="mri_threshold \
+    # mri_threshold is now deprecated, replace it
+    # cmd="mri_threshold \
+    #         ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+    #         $(( ${maxCortical} + 1 )) \
+    #         ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
+    #     "
+    # echo $cmd
+    # log $cmd >> $OUT
+    # eval $cmd
+    cmd="mri_binarize \
+            --i ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+            --max $(( ${maxCortical} )) --inv \
+            --o ${atlasOutputDir}/${subj}_subcort_mask_${atlas}masktmp.nii.gz \
+        "     
+    echo $cmd #state the command
+    log $cmd >> $OUT
+    eval $cmd #execute the command
+
+    cmd="mri_mask \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}masktmp.nii.gz \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    # replace mri_threshold end
+
+    cmd="mri_mask \
             ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
             $(( ${maxCortical} + 1 )) \
             ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
@@ -609,7 +637,7 @@ do
     eval $cmd
 
     # remove temp files
-    ls ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz && rm ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz 
+    ls ${atlasOutputDir}/${subj}_subcort_mask_${atlas}*tmp.nii.gz && rm ${atlasOutputDir}/${subj}_subcort_mask_${atlas}*tmp.nii.gz 
 
     ###########################
     # make a gii of the annot #
