@@ -611,15 +611,6 @@ do
     eval $cmd
     # replace mri_threshold end
 
-    cmd="mri_mask \
-            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
-            $(( ${maxCortical} + 1 )) \
-            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
-        "
-    echo $cmd
-    log $cmd >> $OUT
-    eval $cmd
-
     # add in the re-numbered subcortical
     #cmd="${FSLDIR}/bin/fslmaths \
     #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
