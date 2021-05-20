@@ -41,6 +41,27 @@ def main():
             f.write( "{}\t->\t{}\t== {} \n".format(str(labs[x]), str(x + 1), str(names[x]) ) ) 
             labels.append({'name': names[x], 'label': labs[x], 'voxel_value': (x+1)})
 
+    # add 14 regions to label
+    f14 = [
+            {"name": "Freesurfer Aseg / Left thalamus", "label": "10"},
+            {"name": "Freesurfer Aseg / Left caudate", "label": "11"},
+            {"name": "Freesurfer Aseg / Left putamen", "label": "12"},
+            {"name": "Freesurfer Aseg / Left pallidum", "label": "13"},
+            {"name": "Freesurfer Aseg / Left hippocampus", "label": "17"},
+            {"name": "Freesurfer Aseg / Left amygdala", "label": "18"},
+            {"name": "Freesurfer Aseg / Left accumbens", "label": "26"},
+
+            {"name": "Freesurfer Aseg / Right thalamus", "label": "49"},
+            {"name": "Freesurfer Aseg / Right caudate", "label": "50"},
+            {"name": "Freesurfer Aseg / Right putamen", "label": "51"},
+            {"name": "Freesurfer Aseg / Right pallidum", "label": "52"},
+            {"name": "Freesurfer Aseg / Right hippocampus", "label": "53"},
+            {"name": "Freesurfer Aseg / Right amygdala", "label": "54"},
+            {"name": "Freesurfer Aseg / Right accumbens", "label": "58"},
+    ]
+    for x in range(0,14):
+        labels.append({'name': f14[x]['name'], 'label': f14[x]['label'], 'voxel_value': (x+len(labs)+1)})
+
     with open(o_file+'_label.json','w') as labeljson:
         json.dump(labels, labeljson)
 
