@@ -49,7 +49,7 @@ dev="false"
 
 # if singularity present, and the dev var is false, run this app via
 # singulairty/Docker
-if [[ $(which singularity)  ]] && [[ ${dev}=="false" ]] 
+if [[ $(which singularity)  ]] && [[ ${dev} = "false" ]] 
 then 
     workDir=/
     useSingulairty="yes"
@@ -71,7 +71,7 @@ export scriptBaseDir=${PWD}/
 
 mkdir -p output
 
-if [[ ${useSingulairty}=="yes" ]] 
+if [[ ${useSingulairty} = "yes" ]] 
 then
    echo "data should be inside container"
 else
@@ -117,7 +117,7 @@ cmd="${scriptBaseDir}/src/maTT2_applyGCS.sh \
 	-d ${INPUT_DIR} \
 	-o output \
 	-f ${FS_VERSION}"
-if [[ ${useSingulairty}=="yes" ]] 
+if [[ ${useSingulairty} = "yes" ]] 
 then
     export SINGULARITYENV_atlasList=${atlasList}
     export SINGULARITYENV_atlasBaseDir=${atlasBaseDir}
