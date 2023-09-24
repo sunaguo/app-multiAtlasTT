@@ -205,6 +205,9 @@ cp -asv ${inputFSDir}/surf/?h.sphere.reg ${tempFSSubj}/surf/
 cp -asv ${inputFSDir}/surf/?h.white ${tempFSSubj}/surf/
 cp -asv ${inputFSDir}/surf/?h.pial ${tempFSSubj}/surf/
 cp -asv ${inputFSDir}/surf/?h.smoothwm ${tempFSSubj}/surf/
+cp -asv ${inputFSDir}/surf/?h.sulc ${tempFSSubj}/surf/
+cp -asv ${inputFSDir}/surf/?h.thickness ${tempFSSubj}/surf/
+cp -asv ${inputFSDir}/surf/?h.inflated ${tempFSSubj}/surf/
 
 # label
 cp -asv ${inputFSDir}/label/?h.cortex.label ${tempFSSubj}/label/
@@ -243,7 +246,7 @@ do
         mkdir -p ${outputDir}/${atlas}/
 
         # mris_ca_label [options] <subject> <hemi> <canonsurf> <classifier> <outputfile>
-        cmd="${FREESURFER_HOME}/bin/mris_ca_label \
+        cmd="mris_ca_label \
                     -l ${tempFSSubj}/label/${hemi}.cortex.label \
                     -aseg ${tempFSSubj}/mri/aseg.mgz \
                     -seed 1234 \
@@ -272,11 +275,11 @@ do
         ln -s ${outputDir}/${atlas}/lh.${atlas}.annot ${tempFSSubj}/label/lh.${atlas}.annot
         ln -s ${outputDir}/${atlas}/rh.${atlas}.annot ${tempFSSubj}/label/rh.${atlas}.annot
         # and link the LUT to the output
-        ln -s ${atlasBaseDir}/${atlas}/LUT_${atlas}.txt ${outputDir}/${atlas}/LUT_${atlas}.txt
+        ln -s ${atlasBaseDir}/${atlas}/LUT_${atlas}.txt ${outputDir}/${atlas}/LUT_${atlas}.txt || cp ${atlasBaseDir}/${atlas}/LUT_${atlas}.txt ${outputDir}/${atlas}/LUT_${atlas}.txt
     fi
 
     # mri_aparc2aseg
-    cmd="${FREESURFER_HOME}/bin/mri_aparc2aseg \
+    cmd="mri_aparc2aseg \
             --s ${subj} \
             --annot ${atlas} \
             --volmask \
@@ -287,7 +290,7 @@ do
     eval $cmd #execute the command
 
     # convert out of freesurfer space
-    cmd="${FREESURFER_HOME}/bin/mri_label2vol \
+    cmd="mri_label2vol \
 		    --seg ${outputDir}/${atlas}/${atlas}.mgz \
 		    --temp ${tempFSSubj}/mri/rawavg.mgz \
 		    --o ${outputDir}/${atlas}/${atlas}.nii.gz \
@@ -315,7 +318,8 @@ then
     echo "problem. could not read subjAparcAseg: ${subjAparcAseg}"
     exit 1
 else
-    ln -s ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_ln.nii.gz 
+    cp ${subjAparcAseg} ${outputDir}/subj_aparc+aseg_cp.nii.gz
+    subjAparcAseg=${outputDir}/subj_aparc+aseg_cp.nii.gz
 fi
 
 ####################################################################
@@ -325,15 +329,53 @@ fi
 if [[ ! -e ${outputDir}/${subj}_cortical_mask.nii.gz ]]
 then
 
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${subjAparcAseg} \
-            -thr 1000 -bin \
-            ${outputDir}/${subj}_cortical_mask.nii.gz \
-            -odt int \
-        "
+    # let's get a lh and rh, get largest component of each
+    cmd="mri_binarize \
+            --i ${subjAparcAseg} \
+            --min 1000 --max 1999 --binval 1 \
+            --o ${outputDir}/lh.tmp_cort_mask.nii.gz \
+        "     
     echo $cmd #state the command
     log $cmd >> $OUT
     eval $cmd #execute the command
+    cmd="mri_extract_largest_CC \
+            -T 1 \
+            ${outputDir}/lh.tmp_cort_mask.nii.gz \
+            ${outputDir}/lh.tmp_cort_mask.nii.gz \
+        "     
+    echo $cmd #state the command
+    log $cmd >> $OUT
+    eval $cmd #execute the command
+
+    cmd="mri_binarize \
+            --i ${subjAparcAseg} \
+            --min 2000 --max 2999 --binval 1 \
+            --o ${outputDir}/rh.tmp_cort_mask.nii.gz \
+        "     
+    echo $cmd #state the command
+    log $cmd >> $OUT
+    eval $cmd #execute the command
+    cmd="mri_extract_largest_CC \
+            -T 1 \
+            ${outputDir}/rh.tmp_cort_mask.nii.gz \
+            ${outputDir}/rh.tmp_cort_mask.nii.gz \
+        "     
+    echo $cmd #state the command
+    log $cmd >> $OUT
+    eval $cmd #execute the command
+
+    # write out the combined cortical_mask
+    cmd="mris_calc \
+            -o ${outputDir}/${subj}_cortical_mask.nii.gz \
+            ${outputDir}/lh.tmp_cort_mask.nii.gz \
+            add ${outputDir}/rh.tmp_cort_mask.nii.gz \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+
+    # remove the tmp
+    ls ${outputDir}/?h.tmp_cort_mask.nii.gz && rm ${outputDir}/?h.tmp_cort_mask.nii.gz
 
 fi
 
@@ -360,6 +402,51 @@ then
 
 fi
 
+if [[ ! -e ${outputDir}/bmask.nii.gz ]]
+then
+
+    # function inputs:
+    #   aparc+aseg
+    #   out directory
+    #   subj variable, to name output files
+
+    # function output files:
+    #   bmask.nii.gz
+    #   mask.nii.gz
+
+   get_mask_frm_aparcAseg \
+      ${subjAparcAseg} \
+      ${outputDir} \
+      ${subj}
+
+fi
+
+# save the gii files for the annot.gii output
+if [[ ! -e ${outputDir}/rh.inflated.gii ]]
+then
+
+    for surfname in inflated pial white 
+    do
+
+        cmd="mris_convert \
+	        ${tempFSSubj}/surf/lh.${surfname} \
+	        ${outputDir}/lh.${surfname}.gii \
+            "
+        echo $cmd
+        log $cmd >> $OUT
+        eval $cmd
+        cmd="mris_convert \
+	        ${tempFSSubj}/surf/rh.${surfname} \
+	        ${outputDir}/rh.${surfname}.gii \
+            "
+        echo $cmd
+        log $cmd >> $OUT
+        eval $cmd
+    
+    done
+
+fi
+
 ####################################################################
 ####################################################################
 # loop through atlasList again to get rid of extra areas and to add 
@@ -375,36 +462,53 @@ do
     maxVal=$(cat ${atlasOutputDir}/LUT_${atlas}.txt | awk '{print int($1)}' | tail -n1)
 
     # threshold atlas image to min and max label values from the LUT table
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${atlasOutputDir}/${atlas}.nii.gz \
-            -thr ${minVal} -uthr ${maxVal} \
-            ${atlasOutputDir}/${atlas}.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${atlasOutputDir}/${atlas}.nii.gz \
+    #        -thr ${minVal} -uthr ${maxVal} \
+    #        ${atlasOutputDir}/${atlas}.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="mri_binarize \
+            --i ${atlasOutputDir}/${atlas}.nii.gz \
+            --min ${minVal} \
+            --o ${outputDir}/tmp_mask1.nii.gz \
+        "    
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    cmd="mri_binarize \
+            --i ${atlasOutputDir}/${atlas}.nii.gz \
+            --min $(( ${maxVal} + 1 )) --inv \
+            --o ${outputDir}/tmp_mask2.nii.gz \
+        "    
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    cmd="mri_mask \
+            ${outputDir}/tmp_mask1.nii.gz \
+            ${outputDir}/tmp_mask2.nii.gz \
+            ${outputDir}/tmp_mask3.nii.gz \
+        "    
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
-<<'DONTNEED'
-    # move atlas from freesurfer conformed ---> native space
-    cmd="${FREESURFER_HOME}/bin/mri_vol2vol \
-            --mov ${atlasOutputDir}/${atlas}.nii.gz \
-            --targ ${inputFSDir}/mri/rawavg.mgz \
-            --regheader \
-            --o ${atlasOutputDir}/${atlas}.nii.gz \
-            --no-save-reg --nearest \
-        "
+    cmd="mri_mask \
+            ${atlasOutputDir}/${atlas}.nii.gz \
+            ${outputDir}/tmp_mask3.nii.gz \
+            ${atlasOutputDir}/${atlas}.nii.gz \
+        "    
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
-DONTNEED
+
+    ls ${outputDir}/tmp_mask?.nii.gz && rm ${outputDir}/tmp_mask?.nii.gz
 
     # look at only cortical
-    cmd="${FSLDIR}/bin/fslmaths \
+    cmd="mri_mask \
             ${atlasOutputDir}/${atlas}.nii.gz \
-            -mas ${outputDir}/${subj}_cortical_mask.nii.gz \
+            ${outputDir}/${subj}_cortical_mask.nii.gz \
             ${atlasOutputDir}/${atlas}.nii.gz \
-            -odt int \
         "
     echo $cmd
     log $cmd >> $OUT
@@ -420,57 +524,135 @@ DONTNEED
     #  i_file = str(argv[1])
     #  o_file = str(argv[2])
     #  labs_file = str(argv[3])
-    cmd="python2.7 ${scriptBaseDir}/src/maTT_remap.py \
+    cmd="python3 ${scriptBaseDir}/src/maTT_remap.py \
             ${atlasOutputDir}/${atlas}.nii.gz \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
+            ${atlasOutputDir}/${atlas}_remap.nii.gz \
             ${atlasOutputDir}/LUT_${atlas}.txt \
         "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
+    # if remap is not main, exit 1
+    if [[ ! -e ${atlasOutputDir}/${atlas}_remap.nii.gz ]]
+    then
+        echo "remap output not made"
+        exit 1
+    fi
+
     ########################################
     #add the subcortical areas relabled way#
     ########################################
 
     # remove any stuff in area of subcortical (shouldnt be there anyways...)
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -mas ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -odt int \
-        "
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+    #        -mas ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="mri_mask \
+        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+        ${outputDir}/${subj}_subcort_mask_binv.nii.gz \
+        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+    "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
     # get the max value from cortical atlas image
-    maxCortical=$(fslstats ${atlasOutputDir}/${atlas}_rmap.nii.gz -R | awk '{print int($2)}')
+    # maxCortical=$(fslstats ${atlasOutputDir}/${atlas}_remap.nii.gz -R | awk '{print int($2)}')
+    mris_calc -o ${outputDir}/max_tmp.txt ${atlasOutputDir}/${atlas}_remap.nii.gz max
+    maxCortical=$( cat ${outputDir}/max_tmp.txt | awk '{print int($1)}')
+    ls ${outputDir}/max_tmp.txt && rm ${outputDir}/max_tmp.txt
+
     # add the max value to subcort, theshold out areas that should be 0
-    cmd="${FSLDIR}/bin/fslmaths \
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${outputDir}/${subj}_subcort_mask.nii.gz \
+    #        -add ${maxCortical} \
+    #        -thr $(( ${maxCortical} + 1 ))
+    #        ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="mris_calc \
+            -o ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
             ${outputDir}/${subj}_subcort_mask.nii.gz \
-            -add ${maxCortical} \
-            -thr $(( ${maxCortical} + 1 ))
-            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
-            -odt int \
+            add ${maxCortical} \
         "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
-    # add in the re-numbered subcortical
-    cmd="${FSLDIR}/bin/fslmaths \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
-            ${atlasOutputDir}/${atlas}_rmap.nii.gz \
-            -odt int \
+    # mri_threshold is now deprecated, replace it
+    # cmd="mri_threshold \
+    #         ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+    #         $(( ${maxCortical} + 1 )) \
+    #         ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
+    #     "
+    # echo $cmd
+    # log $cmd >> $OUT
+    # eval $cmd
+    cmd="mri_binarize \
+            --i ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+            --max $(( ${maxCortical} )) --inv \
+            --o ${atlasOutputDir}/${subj}_subcort_mask_${atlas}masktmp.nii.gz \
+        "     
+    echo $cmd #state the command
+    log $cmd >> $OUT
+    eval $cmd #execute the command
+
+    cmd="mri_mask \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}masktmp.nii.gz \
+            ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
         "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    # replace mri_threshold end
+
+    # add in the re-numbered subcortical
+    #cmd="${FSLDIR}/bin/fslmaths \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+    #        -add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz \
+    #        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+    #        -odt int \
+    #    "
+    cmd="mris_calc \
+        -o ${atlasOutputDir}/${atlas}_remap.nii.gz \
+        ${atlasOutputDir}/${atlas}_remap.nii.gz \
+        add ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz  \
+    "
     echo $cmd
     log $cmd >> $OUT
     eval $cmd
 
     # remove temp files
-    ls ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz && rm ${atlasOutputDir}/${subj}_subcort_mask_${atlas}tmp.nii.gz 
+    ls ${atlasOutputDir}/${subj}_subcort_mask_${atlas}*tmp.nii.gz && rm ${atlasOutputDir}/${subj}_subcort_mask_${atlas}*tmp.nii.gz 
+
+    ###########################
+    # make a gii of the annot #
+    ###########################
+
+    # lh
+    cmd="mris_convert \
+            --annot ${atlasOutputDir}/lh.${atlas}.annot \
+	    ${tempFSSubj}/surf/lh.white \
+	    ${atlasOutputDir}/lh.${atlas}.annot.gii \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
+    
+    # rh
+    cmd="mris_convert \
+            --annot ${atlasOutputDir}/rh.${atlas}.annot \
+	    ${tempFSSubj}/surf/rh.white \
+	    ${atlasOutputDir}/rh.${atlas}.annot.gii \
+        "
+    echo $cmd
+    log $cmd >> $OUT
+    eval $cmd
 
 done
 
