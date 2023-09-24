@@ -1,4 +1,4 @@
 {
-    "fsin": "testdata/output",
-    "atlas": "yeo17dil"
+	"fsin":	"tmp_data/output",
+	"atlas":	"hcp-mmp-b"
 }

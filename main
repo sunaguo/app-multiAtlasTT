@@ -6,8 +6,8 @@
 # FreeSurfer
 # altas GCS data, which is automatically downloaded from figShare
 
-set -e
-set -x
+# set -e
+# set -x
 
 ####################################################################
 ####################################################################
@@ -130,9 +130,20 @@ fi
 
 ####################################################################
 ####################################################################
+# re run annot to gii due to segfault issues in initial run
+for atlas in $atlasList
+do
+	if [[ ${atlas} == 'hcp-mmp-b' ]]; then
+		singularity exec docker://brainlife/dipy:latest ${scriptBaseDir}/src/update_annot_labels.py
+	fi
+	singularity exec -e -B `pwd`/license.txt:/usr/local/freesurfer/license.txt docker://brainlife/freesurfer:7.1.1 ${scriptBaseDir}/src/annot_to_gii.sh
+done
+
+####################################################################
+####################################################################
 # output handling
 
-mkdir -p parc-vol mask
+mkdir -p parc-vol mask parc-surf-data parc-surf-verts
 for atlas in $atlasList
 do
     # parc-vol
@@ -140,32 +151,27 @@ do
     cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc-vol/key.txt
     cp output/${atlas}/${atlas}_remap.nii.gz_label.json parc-vol/label.json
     
+	# surf verts
+	for surfname in inflated pial white
+	do
+		cp output/lh.${surfname}.gii ./parc-surf-verts/lh.${surfname}.gii
+		cp output/rh.${surfname}.gii ./parc-surf-verts/rh.${surfname}.gii
+	done
+
+	# surf data
+	cp output/${atlas}/lh.${atlas}.annot.gii ./parc-surf-data/left.gii
+	cp output/${atlas}/rh.${atlas}.annot.gii ./parc-surf-data/right.gii
+    cp output/${atlas}/${atlas}_remap.nii.gz_remapKey.txt parc-surf-data/key.txt
+    cp output/${atlas}/${atlas}_remap.nii.gz_label.json parc-surf-data/label.json
+
     # mask
     cp output/mask.nii.gz mask/mask.nii.gz
 done
-	
+
+# delete extra stuff
+# the temp fsDirectory we setup at very beginning
+rm -r ./output/tmpFsDir/
+
 echo "{\"tags\": [\"${atlas}\" ]}" > product.json
 
 echo "finished maTT2 with status: $?"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -658,7 +658,7 @@ done
 
 # delete extra stuff
 # the temp fsDirectory we setup at very beginning
-ls -d ${outputDir}/tmpFsDir/ && rm -r ${outputDir}/tmpFsDir/
+# ls -d ${outputDir}/tmpFsDir/ && rm -r ${outputDir}/tmpFsDir/
 
 } # main
 
