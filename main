@@ -143,7 +143,7 @@ done
 ####################################################################
 # output handling
 
-mkdir -p parc-vol mask parc-surf-data parc-surf-verts
+mkdir -p parc-vol mask parc-surf-data parc-surf-verts parc-surf-verts/left parc-surf-verts/right
 for atlas in $atlasList
 do
     # parc-vol
@@ -154,8 +154,8 @@ do
 	# surf verts
 	for surfname in inflated pial white
 	do
-		cp output/lh.${surfname}.gii ./parc-surf-verts/lh.${surfname}.gii
-		cp output/rh.${surfname}.gii ./parc-surf-verts/rh.${surfname}.gii
+		cp output/lh.${surfname}.gii ./parc-surf-verts/left/lh.${surfname}.gii
+		cp output/rh.${surfname}.gii ./parc-surf-verts/right/rh.${surfname}.gii
 	done
 
 	# surf data
